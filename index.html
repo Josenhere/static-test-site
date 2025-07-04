@@ -7,64 +7,60 @@
     src="https://privacyportaltrial.onetrust.com/consent-embedded-forms/consent-receipt-scripts/OtFormStub.js"
     data-id="718dd515-289c-4128-91b2-c4f5574c5082"
   ></script>
-  <script>
-//       OneTrust.webform.TriggerReceiptAction({
-//           cpId:'${collection point id}', // mandatory
-//           receiptApiEndpoint:'${API url}', // mandatory
-//           identifier:'${identifier}', // mandatory
-//           token:'${jwt token string}', // mandatory
-//           purposes:[], // optional
-//           dsDataElements:{}, // optional,
-//           customElements:{}, // optional
-//           downloadRawReceipt: true, // optional
-//           useBeacon: true, // optional
-//           language: '${lang code}' // optional
-      
-//       })
-
-// Purpose structure:
-// {
-//     Id: '${purpose id}]', // mandatory
-//     TransactionType:'' // optional [NO_CHOICE, NOTGIVEN, OPT_OUT, NO_OPT_OUT]
-// }
-  </script>
 </head>
 <body>
   <h1>Push Notification MVP Test</h1>
   <button id="notify-btn">Request & Test Notification</button>
   <p id="status"></p>
 
-<button class="ot-open-webform" id="ot-9976e0a7-8f5a-42dc-9e82-0e938583b03d">Open Web Form</button>
+  <button class="ot-open-webform" id="ot-9976e0a7-8f5a-42dc-9e82-0e938583b03d">Open Web Form</button>
 
-  <div id="ot-container">
-    Show the form here...
-
-  </div>
-
+  <div id="ot-container">Show the form here...</div>
 
   <script>
-    // Check for Notification API support
-    if (!('Notification' in window)) {
-      document.getElementById('status').innerText = 'This browser does not support notifications.';
-    }
+    const pushPurposeId = "71c0f1c3-311d-4757-89e2-ce6fbccab107";
+    let notificationPermissionChecked = false;
 
-    // Optionally register a service worker (required for real push)
+    // Service Worker Registration
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(function(reg) {
-        console.log('Service Worker registered.', reg);
-      }).catch(function(err) {
-        console.warn('Service Worker registration failed.', err);
-      });
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker registered.', reg))
+        .catch(err => console.warn('Service Worker registration failed.', err));
     }
 
-    document.getElementById('notify-btn').onclick = function() {
-      if (!('Notification' in window)) return;
-      Notification.requestPermission().then(function(permission) {
-        document.getElementById('status').innerText = 'Permission: ' + permission;
-        if (permission === 'granted') {
-          // Show a local notification
+    // Button click handler
+    document.getElementById('notify-btn').onclick = function () {
+      if (!('Notification' in window)) {
+        document.getElementById('status').innerText = 'This browser does not support notifications.';
+        return;
+      }
+
+      const oldPermission = Notification.permission;
+
+      Notification.requestPermission().then(function (newPermission) {
+        document.getElementById('status').innerText = 'Permission: ' + newPermission;
+
+        // Trigger receipt only if user made a decision (from 'default' to 'granted' or 'denied')
+        if (!notificationPermissionChecked && oldPermission === 'default' && (newPermission === 'granted' || newPermission === 'denied')) {
+          notificationPermissionChecked = true;
+          console.log("trigger receipt action");
+
+          OneTrust.webform.TriggerReceiptAction({
+            cpId: '9976e0a7-8f5a-42dc-9e82-0e938583b03d',
+            receiptApiEndpoint: 'https://privacyportaltrial.onetrust.com/request/v1/consentreceipts',
+            identifier: 'sdk-test@mail.com',
+            token: 'eyJhbGciOiJSUzUxMiJ9.eyJvdEp3dFZlcnNpb24iOjEsInByb2Nlc3NJZCI6Ijk5NzZlMGE3LThmNWEtNDJkYy05ZTgyLTBlOTM4NTgzYjAzZCIsInByb2Nlc3NWZXJzaW9uIjoyLCJpYXQiOiIyMDIzLTExLTEwVDEzOjA5OjMwLjMyIiwibW9jIjoiRU1CRURERURfV0VCX0ZPUk0iLCJwb2xpY3lfdXJpIjpudWxsLCJzdWIiOiJFbWFpbCIsImlzcyI6bnVsbCwidGVuYW50SWQiOiI3MThkZDUxNS0yODljLTQxMjgtOTFiMi1jNGY1NTc0YzUwODIiLCJkZXNjcmlwdGlvbiI6Ii0iLCJjb25zZW50VHlwZSI6Ik9QVElOQ0hFQ0tCT1giLCJhbGxvd05vdEdpdmVuQ29uc2VudHMiOmZhbHNlLCJkb3VibGVPcHRJbiI6ZmFsc2UsInB1cnBvc2VzIjpbeyJpZCI6IjcxYzBmMWMzLTMxMWQtNDc1Ny04OWUyLWNlNmZiY2NhYjEwNyIsInZlcnNpb24iOjUsInBhcmVudElkIjpudWxsLCJ0b3BpY3MiOltdLCJjdXN0b21QcmVmZXJlbmNlcyI6W10sImF0dHJpYnV0ZXMiOnsiTXlBdHRyaWJ1dGUiOlsiVGlnZXIiXX0sImVuYWJsZUdlb2xvY2F0aW9uIjpmYWxzZSwiaW1wbGljaXRDb25zZW50TGlmZVNwYW4iOjB9XSwibm90aWNlcyI6W10sImRzRGF0YUVsZW1lbnRzIjpbXSwiYXV0aGVudGljYXRpb25SZXF1aXJlZCI6ZmFsc2UsInJlY29uZmlybUFjdGl2ZVB1cnBvc2UiOmZhbHNlLCJvdmVycmlkZUFjdGl2ZVB1cnBvc2UiOnRydWUsImR5bmFtaWNDb2xsZWN0aW9uUG9pbnQiOmZhbHNlLCJhZGRpdGlvbmFsSWRlbnRpZmllcnMiOltdLCJtdWx0aXBsZUlkZW50aWZpZXJUeXBlcyI6ZmFsc2UsImVuYWJsZVBhcmVudFByaW1hcnlJZGVudGlmaWVycyI6ZmFsc2UsInBhcmVudFByaW1hcnlJZGVudGlmaWVyc1R5cGUiOm51bGwsImFkZGl0aW9uYWxQYXJlbnRJZGVudGlmaWVyVHlwZXMiOltdLCJlbmFibGVHZW9sb2NhdGlvbiI6dHJ1ZSwiZGF0YUVsZW1lbnRUeXBlTWFwIjp7fX0.Kr-VwXCxVM-2upsbmbjK4X_2L3SY37uvjmykcKIik3VUYmz2Usqm0jwdqhma68j8C7_Ljix6fum7FNMZQeFBw3Js32gSAXCRkfqlERxxJgcjUbIs9N6lTMvs5LIofXP83aShAKgz_TRyIPbq7pxjprDJse-XQgfpxdxpuAv3qnc4eI37KkrSkarqEzoBW4JdTpPfdR6BzLNiqlwZOR2XUajwdx7AyX3qRb-SW6b0MOwuT0hOWgxpSxW1NzXPw6J-u-ncfmMTTzoHXQ3lkVntoBewXIKTm9cii77ejam2f8JGCyAzfzOgyGyz3jfT5DSK5IHMMfmd7KOJYCw2qd2JU-qm_JwjOb4GKxKvkIizQIZ9rgCLNGOp2AiAfSHUw6lvXtsG732HpRG3HRGfeot8SDvEhl0S-HSUzZzbhTKlZhqlBDhX9-LZvD5Fqzc2PsUKb71yiTiJHOvmBmC31iKOnieyaDdeVj1_k4vFB9dVSbfvk0-KqyL4-7zbG_85VRTfCI19VwM9tftsXVRb1jPTDL2INTHbkXF811hzmjs2mFkoTgdYlx9GhHPAychMmvWt46n5F-ijD57-mS6V8m-qGdrO8yjwM_NatpBISFUlKNoxarsKae3MjAemg_lo9g36_xYGlVfhMoLCgDy-CkLLA_0Kro7cGhh5jC23U5aaw20',
+            purposes: [{ Id: pushPurposeId }],
+            downloadRawReceipt: false,
+            useBeacon: false,
+            language: 'en-US'
+          });
+        }
+
+        // Show local notification
+        if (newPermission === 'granted') {
           if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(function(reg) {
+            navigator.serviceWorker.ready.then(function (reg) {
               reg.showNotification('Test Notification', {
                 body: 'This is a test notification!',
                 icon: 'https://static.thenounproject.com/png/216528-200.png',
@@ -78,7 +74,7 @@
           }
         }
       });
-    }
+    };
   </script>
 </body>
 </html>
