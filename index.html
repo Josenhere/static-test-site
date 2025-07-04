@@ -3,11 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Push Notification MVP Test</title>
+  <script
+    src="https://privacyportaltrial.onetrust.com/consent-embedded-forms/consent-receipt-scripts/OtFormStub.js"
+    data-id="718dd515-289c-4128-91b2-c4f5574c5082"
+  ></script>
+  <script>
+//       OneTrust.webform.TriggerReceiptAction({
+//           cpId:'${collection point id}', // mandatory
+//           receiptApiEndpoint:'${API url}', // mandatory
+//           identifier:'${identifier}', // mandatory
+//           token:'${jwt token string}', // mandatory
+//           purposes:[], // optional
+//           dsDataElements:{}, // optional,
+//           customElements:{}, // optional
+//           downloadRawReceipt: true, // optional
+//           useBeacon: true, // optional
+//           language: '${lang code}' // optional
+      
+//       })
+
+// Purpose structure:
+// {
+//     Id: '${purpose id}]', // mandatory
+//     TransactionType:'' // optional [NO_CHOICE, NOTGIVEN, OPT_OUT, NO_OPT_OUT]
+// }
+  </script>
 </head>
 <body>
   <h1>Push Notification MVP Test</h1>
   <button id="notify-btn">Request & Test Notification</button>
   <p id="status"></p>
+
+<button class="ot-open-webform" id="ot-9976e0a7-8f5a-42dc-9e82-0e938583b03d">Open Web Form</button>
+
 
   <script>
     // Check for Notification API support
