@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Push Notification MVP Test</title>
+</head>
+<body>
+  <h1>Push Notification MVP Test</h1>
+  <button id="notify-btn">Request & Test Notification</button>
+  <p id="status"></p>
+
+  <script>
+    // Check for Notification API support
+    if (!('Notification' in window)) {
+      document.getElementById('status').innerText = 'This browser does not support notifications.';
+    }
+
+    // Optionally register a service worker (required for real push)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(function(reg) {
+        console.log('Service Worker registered.', reg);
+      }).catch(function(err) {
+        console.warn('Service Worker registration failed.', err);
+      });
+    }
+
+    document.getElementById('notify-btn').onclick = function() {
+      if (!('Notification' in window)) return;
+      Notification.requestPermission().then(function(permission) {
+        document.getElementById('status').innerText = 'Permission: ' + permission;
+        if (permission === 'granted') {
+          // Show a local notification
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(function(reg) {
+              reg.showNotification('Test Notification', {
+                body: 'This is a test notification!',
+                icon: 'https://static.thenounproject.com/png/216528-200.png',
+              });
+            });
+          } else {
+            new Notification('Test Notification', {
+              body: 'This is a test notification!',
+              icon: 'https://static.thenounproject.com/png/216528-200.png',
+            });
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
